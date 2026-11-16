@@ -1,7 +1,7 @@
 # Aevum Builder Challenge #1 — Build Plan: PayShield on Aevum
 
-**Status:** scaffold only (research + skeleton). Nothing submitted, nothing deployed, no wallet connected.
-**Last updated:** 2026-11-16 ~12:30 IST (research day 1 of build window).
+**Status:** repo live + pushed, RPC works, tUSD8 verified on-chain. No deploy yet, no wallet connected.
+**Last updated:** 2026-11-16 ~15:10 IST (recon day 1 of build window — repo + RPC + tUSD8 verified).
 
 ## 1. The challenge (verified)
 
@@ -49,15 +49,15 @@
 | Explorer | `https://explorer-test.qday.info` | wiki FAQ, starter kit |
 | Native gas token | **tQDAY**, 18 decimals (testnet only, no value) | wiki FAQ |
 | Stablecoin | **tUSD8** `0x456569838f1d43009A91ebA4263147Afd7233483`, ERC-20, **6 decimals** | qday.io/official-links (last verified Nov 10, 2026), wiki FAQ §3.8, starter kit |
-| Faucet | `https://faucet.qday.info/en` — gives tQDAY and/or tUSD8. Faucet contract `0xE5074CBbd046AFb491EB8692abD6cF7ECCC6dEE5` | wiki FAQ, Medium guide, starter kit |
+| Faucet | `https://faucet.qday.info/en` — **tQDAY: 5 per claim, once per 24h per recipient address** (relay sends it, no gas/signing needed; tops up a tiny amount first if the address has no gas). **tUSD8: 1 per claim, same 24h limit shared with Trellis app claims; requires Trellis Wallet sign-in (email + code) and an activated Main Wallet — tokens go only to that wallet.** Faucet address on the live page: `0x33d19Bde2e1798c13808f17BfBa1780b28e4bACC` — NOTE: differs from the wiki/Medium address `0xE5074CBbd046AFb491EB8692abD6cF7ECCC6dEE5`; BOTH have code on-chain (verified 2026-11-16 ~15:10 IST), page address is the current one. The page also carries a "tUSD8 faucet is temporarily unavailable" state string — availability at claim time is unconfirmed until the user signs in. | wiki FAQ, Medium guide, starter kit + **live faucet page read 2026-11-16 ~15:10 IST** |
 | EVM compatibility | Full — Solidity, Foundry, Hardhat, Remix, ethers.js, viem, wagmi all work; only the RPC changes | wiki FAQ §4.1, qday.io |
 | Gas model | EIP-1559 (base fee + priority fee), paid in tQDAY | wiki FAQ §3.7 |
 
-### Scaffold verification (2026-11-16 ~12:45 IST)
-- `forge build` + `forge test`: **9/9 tests pass** (create/claim/refund, double-claim revert, only-recipient, refund rules, zero-value reverts, expiry flag). One benign lint warning: `block.timestamp` comparison in `isExpired` — a 7-day window, validator drift of seconds is irrelevant; left as is.
-- Local `git init` done in the scaffold dir only (for the Foundry submodules); **no GitHub repo created, nothing pushed**.
-- **RPC JSON-RPC POSTs TIME OUT from this VM** (3 attempts: `eth_chainId`, `eth_blockNumber`, `web3_clientVersion` — all 8–15 s timeouts, rc=28/000). **GET to the RPC root returns HTTP 200**, and the explorer, faucet and wiki all return HTTP 200 in ~2 s. So the host is alive but JSON-RPC POSTs hang from this egress. **Deploy/verify steps must be retried from the user's machine, another network, or Remix in the browser** — do not assume the VM can deploy. Re-test before milestone 2.
-- tUSD8 contract **code not yet verified live** (could not read it — same RPC block). Verify `eth_getCode` + `decimals()`/`symbol()` on a working connection before trusting the address in code; the address itself is confirmed by three official sources.
+### Scaffold verification (2026-11-16 ~12:45 IST, re-confirmed ~15:10 IST)
+- `forge build` + `forge test`: **9/9 tests pass** (create/claim/refund, double-claim revert, only-recipient, refund rules, zero-value reverts, expiry flag). Re-run 15:10 IST: 9 passed, 0 failed. One benign lint warning: `block.timestamp` comparison in `isExpired` — a 7-day window, validator drift of seconds is irrelevant; left as is.
+- **GitHub repo CREATED + PUSHED 2026-11-16 ~15:05 IST: https://github.com/charry99/aevum-payshield** (public, commit `f1483fb`, 17 files, master branch). Homepage = DoraHacks detail page; topics: solidity, foundry, stablecoin, escrow, aevum, qday, hackathon, confirmation-of-payee. No secrets in history (`.env` gitignored, only `.env.example` committed).
+- **RPC JSON-RPC POSTs NOW WORK from this VM (2026-11-16 ~15:07 IST):** `eth_chainId` → `0xabe5` (44005) in 5.2 s, `eth_blockNumber` → `0x32838a` (3,293,578) in 1.3 s. The ~12:30 IST timeouts were transient — deploy/verify from this VM is back on the table, but re-test at deploy time.
+- **tUSD8 VERIFIED ON-CHAIN (2026-11-16 ~15:08 IST, chain 44005):** code exists; `decimals()` = 6; `symbol()` = "tUSD8"; `name()` = "tUSD8"; `totalSupply()` = 206,000 tUSD8 (0x2ef7007d200, 6 decimals). Address `0x456569838f1d43009A91ebA4263147Afd7233483` is safe to hardcode in the deploy script.
 
 ### Not verified / not available (do NOT build the core on these)
 - **QDay SDK (`@qday-io/sdk`) and CLI are NOT published** — planned Q1 2027 (wiki wallet-integration page). No npm package to install.
@@ -144,7 +144,7 @@ Deployment targets (all free): frontend on Render free tier (same as PayShield) 
 
 | # | Dates | Work | Done when |
 |---|---|---|---|
-| M0 | Nov 16–17 | **Setup.** Create GitHub repo `aevum-payshield` (user step — browser). Claim faucet tQDAY + tUSD8. Re-test RPC POST from a working network; verify tUSD8 `decimals()`/`symbol()`/`getCode` live. Foundry project compiles; OZ deps installed. | Repo exists, wallet funded on testnet, contract compiles |
+| M0 | Nov 16–17 | **Setup.** ~~Create GitHub repo `aevum-payshield` (user step — browser).~~ **DONE 2026-11-16 ~15:05 IST via gh CLI** — repo live at https://github.com/charry99/aevum-payshield, scaffold pushed (commit `f1483fb`). Claim faucet tQDAY + tUSD8 (user step — faucet needs his wallet + Trellis sign-in for tUSD8). ~~Re-test RPC POST from a working network; verify tUSD8 `decimals()`/`symbol()`/`getCode` live.~~ **DONE 2026-11-16 ~15:07–15:10 IST** — RPC POSTs work from this VM, tUSD8 verified on-chain (decimals 6, symbol tUSD8, totalSupply 206,000). Foundry project compiles; OZ deps installed. | Repo exists, wallet funded on testnet, contract compiles |
 | M1 | Nov 18–20 | **Contract + tests.** Finish `PayShieldHub.sol`, Foundry tests green (incl. mock token), deploy to Aevum, **verify source on explorer**. Record contract address + deploy tx. | Verified contract on explorer, tests passing |
 | M2 | Nov 21–24 | **Frontend.** Wallet connect + network add, create/claim/cancel UI, lookalike checker, receipts page. CLI script fallback (`scripts/pay.js`) if the UI slips. | Full flow works end-to-end on testnet in the browser |
 | M3 | Nov 25–27 | **Demo + docs.** Record a clean end-to-end testnet run (create → claim, plus a lookalike warning + a refund). Write README + ARCHITECTURE + DEMO docs. Dockerfile builds and runs. Frontend deployed (Render free). | Live demo URL works; docs complete |
@@ -179,10 +179,11 @@ Deployment targets (all free): frontend on Render free tier (same as PayShield) 
 
 ## 9. Open questions for the user (decisions only he can make)
 
-1. **Repo name:** `aevum-payshield` (proposed) — okay, or a different name? Repo creation is a browser step (parent agent).
-2. **Wallet for deploy:** use his main EVM wallet or a fresh deploy wallet? (Fresh is cleaner for a hackathon; the faucet funds whichever address he pastes. No wallet connection by agents — he connects it himself in MetaMask/Remix.)
+1. **Repo name:** ~~`aevum-payshield` (proposed) — okay, or a different name?~~ **RESOLVED 2026-11-16 ~15:05 IST** — repo created as `aevum-payshield` at https://github.com/charry99/aevum-payshield.
+2. **Wallet for deploy:** use his main EVM wallet or a fresh deploy wallet? (Fresh is cleaner for a hackathon; the faucet funds whichever address he pastes. No wallet connection by agents — he connects it himself in MetaMask/Remix.) **STILL OPEN — blocks M1 deploy.**
 3. **Demo video:** he records it (voice + screen), or a silent screen-recording with captions? Needs his voice/face decision for the pitch.
 4. **Discord:** join https://discord.gg/bYPhjmrSfK for office-hours help? (Not joined yet — needs his go-ahead.)
+5. **Faucet claim (user step):** tQDAY 5/day is a no-sign relay claim (just paste his address); tUSD8 1/day needs Trellis Wallet sign-in + activated Main Wallet. Which address should the faucet funds go to — same as the deploy wallet decision above. Claim early: the 24h cooldown means every day of delay is a lost claim.
 
 ## 10. Sources (all official unless noted)
 
