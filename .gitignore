@@ -1,0 +1,16 @@
+# Foundry / build outputs
+out/
+cache/
+broadcast/
+lib/
+
+# Secrets — NEVER commit these
+.env
+.env.*
+*.key
+*.pem
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

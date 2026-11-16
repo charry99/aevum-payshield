@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PayShield on Aevum — Confirmation of Payee for tUSD8</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+  h1 { font-size: 1.4rem; }
+  label { display: block; margin: 0.8rem 0 0.2rem; font-weight: 600; }
+  input, textarea { width: 100%; padding: 0.5rem; font-size: 1rem; box-sizing: border-box; }
+  button { margin-top: 1rem; padding: 0.7rem 1.2rem; font-size: 1rem; cursor: pointer; }
+  #verdict { margin-top: 1rem; padding: 1rem; border: 2px solid #999; display: none; }
+  #verdict.safe { border-color: green; }
+  #verdict.caution { border-color: orange; }
+  #verdict.danger { border-color: red; }
+  #receipts { margin-top: 2rem; }
+  .muted { color: #666; font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<h1>PayShield on Aevum</h1>
+<p>Confirmation of Payee for tUSD8 — check the recipient <em>before</em> you pay, then settle through an on-chain escrow. Testnet only. tUSD8 has no value.</p>
+
+<p><button id="connectBtn">Connect wallet (Aevum testnet)</button>
+<span id="walletStatus" class="muted">Not connected.</span></p>
+
+<h2>1. Create a payment</h2>
+<label for="recipient">Recipient address</label>
+<input id="recipient" placeholder="0x..." autocomplete="off">
+<label for="amount">Amount (tUSD8)</label>
+<input id="amount" type="number" min="0" step="0.000001" placeholder="10">
+<label for="memo">Memo</label>
+<input id="memo" placeholder="Invoice #1 — design work">
+<button id="checkBtn">Check payee first</button>
+
+<div id="verdict"></div>
+<button id="createBtn" disabled>Create escrowed payment</button>
+
+<h2>2. Claim / refund</h2>
+<label for="paymentId">Payment ID</label>
+<input id="paymentId" type="number" min="0" placeholder="0">
+<button id="claimBtn">Claim as recipient</button>
+<button id="refundBtn">Refund as payer</button>
+
+<h2>Receipts</h2>
+<div id="receipts" class="muted">No payments yet this session. Every step links to the explorer.</div>
+
+<p class="muted">Network: QDay Aevum testnet (chain 44005) · tUSD8: 0x456569838f1d43009A91ebA4263147Afd7233483 · Contract address set after deploy (see README). This is a check, not a guarantee.</p>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
