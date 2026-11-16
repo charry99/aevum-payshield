@@ -1,5 +1,47 @@
 # Aevum PayShield — Progress Log
 
+## 2026-11-16 ~15:15 IST — M1 prep: compile + gas + faucet probe + Remix package (NO deploy)
+
+**User decision (15:10 IST): "I'll deploy via Remix from my main wallet."** No throwaway deployer.
+Deploy wallet: main `0x2DB8be71CCdAa91f578721378fbA05F6EE198686`.
+
+### Build + tests (re-run)
+- `forge build`: clean (one benign `block.timestamp` lint warning, as before).
+- `forge test`: **9 passed, 0 failed**.
+- Bytecode: init code **5,950 bytes**, runtime **5,450 bytes**, deploy data with args 5,982 bytes.
+  Compiler solc 0.8.20, optimizer OFF (foundry.toml — Remix must match for verification).
+- Deploy gas (forge script dry-run on live RPC): **1,632,358 gas** (CREATE tx, gas `0x18e866`).
+  Live gasPrice ~1 gwei → deploy costs ≈ **0.00163 tQDAY**. Recommend gas limit 2,000,000 in Remix.
+
+### Faucet — tQDAY claim for main wallet: BLOCKED on captcha (user-side step)
+- Main wallet on Aevum: tQDAY **0**, tUSD8 **0** — faucet claim is required before the deploy.
+- Faucet flow reverse-engineered from the live page JS: claim is `POST https://faucet.qday.info/gasapi/claim`
+  with body `{address, captchaToken}` where the token comes from **Cloudflare Turnstile**
+  (site key `0x4AAAAAAFbHzhwWSPHWtco1`, loaded from challenges.cloudflare.com). **Cannot be
+  claimed via curl — needs the user's browser.**
+- Backend `/info`: faucet funded, tUSD8 enabled, drip 1 tUSD8; `gasDrip` 0.0002 tQDAY top-up;
+  page advertises 5 tQDAY per claim, 24h cooldown.
+- **Eligibility pre-check says `{"eligible":false,"via":null}` for the main wallet** — reason
+  unknown from the backend. On-chain state contradicts a real block: faucet contract holds
+  **705 tQDAY**, gas wallet holds **6,250.89 tQDAY**, `lastClaim(main wallet) = 0` (never claimed),
+  `cooldown() = 86,400` (24h). Most likely the shared-VM IP is rate-limited, or a backend quirk.
+  User should try the claim in his own browser first; fallback is Discord office hours.
+- tUSD8 claim (1/day) needs Trellis Wallet sign-in — not needed for the deploy, claim after.
+
+### Remix deploy package (DONE)
+- **`REMIX-DEPLOY.md`** (42,666 bytes): network add steps, faucet steps, Remix compile
+  (0.8.20, optimizer OFF), deploy steps (constructor arg tUSD8, gas limit 2,000,000),
+  explorer verification steps (constructor args ABI-encoded), troubleshooting. Flattened
+  source embedded verbatim in the doc.
+- **`PayShieldHub.flattened.sol`** (35,559 bytes): `forge flatten` output, OZ v5.4.0, same
+  content as in the doc. Both files committed + pushed.
+- Repo now at commit (see git log): REMIX-DEPLOY.md + PayShieldHub.flattened.sol + PROGRESS.md.
+
+### Still open (user steps)
+- Claim tQDAY on faucet.qday.info from his browser (Turnstile), confirm ~5 tQDAY landed.
+- Deploy via Remix from the main wallet following REMIX-DEPLOY.md; report contract address + tx hash.
+- Demo-video format + Discord join still open.
+
 ## 2026-11-16 ~15:05–15:10 IST — Repo + recon (no deploy)
 
 ### Repo (DONE)
